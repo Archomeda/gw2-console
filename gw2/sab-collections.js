@@ -204,7 +204,7 @@ async function dungeonCollection() {
     const [achievements, accountAchievements, items, bank, characters] = await Promise.all([
         _api.achievements().many(collectionAchievements),
         _api.account().achievements().many(collectionAchievements),
-        _api.items().many(Object.values(sabItems).concat(Object.values(sabContainers, Object.values(tokenItems))).flat()),
+        _api.items().many(Object.values(sabItems).concat(Object.values(sabContainers), Object.values(tokenItems)).flat()),
         _api.account().bank().get(),
         _api.characters().all()
     ]);
@@ -213,7 +213,6 @@ async function dungeonCollection() {
 
     // Get skin ids from achievements
     const achievementSkins = new Map(achievements.map(a => [a.id, a.bits.map(b => b.id)]));
-    const skinIds = Array.from(achievementSkins.values());
 
     // Get item skins
     const itemsToFind = new Map(items.map(x => {
@@ -282,11 +281,6 @@ async function dungeonCollection() {
             addOwnedItem(bankSlot.id, bankSlot.count, 'Bank');
         }
     }
-
-    //const skins = new Map(
-    //    (await Promise.all(skinIds.map(x => _api.skins().many(x))))
-    //        .flat()
-    //        .map(x => [x.id, x]));
 
     _terminal.writeLine(`<span style='color:yellow;'>This command will search your account for all SAB related skin collections, and outputs the result. Please wait...</span>`);
     _terminal.writeLine();
