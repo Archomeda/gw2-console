@@ -1,0 +1,21 @@
+{
+  "name": "gw2-console",
+  "version": "1.0.0",
+  "description": "A Javascript sandbox to play around with Guild Wars 2 commands",
+  "repository": "Archomeda/gw2-console",
+  "author": "Archomeda",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "webpack-dev-server --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "gw2api-client": "^7.1.0",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1",
+    "webpack-merge": "^4.2.1"
+  }
+}
