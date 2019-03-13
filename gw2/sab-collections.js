@@ -338,7 +338,7 @@ async function dungeonCollection() {
             result += ` - Tokens to collect: ${tokensRequired - tokensUnlocked < 0 ? 0 : tokensRequired - tokensUnlocked}x ${name}\n`;
         }
         if (itemsUnlocked.length > 0) {
-            result += itemsUnlocked.join('\n');
+            result += `${itemsUnlocked.join('\n')}\n`;
         }
         result += `\n`;
     }
