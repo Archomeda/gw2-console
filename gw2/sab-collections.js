@@ -165,7 +165,7 @@ const sabItems = {
 
 const sabContainers = {
     2867: [
-        78039, // Super Adventure Weapon Box (bound orange skin)
+        78039, // Super Adventure Weapon Box (bound orange weapon skin or 8 Crimson Assassin Tokens)
         78071, // Kaiser Snake Weapon Box (King Toad)
         78049, // Kaiser Snake Weapon Box (Storm Wizard)
         78058 // Kaiser Snake Weapon Box (skin)
@@ -197,6 +197,21 @@ const tokenCosts = {
     }
 };
 
+const itemProviders = {
+    80890: [
+        {
+            id: 80862,
+            count: 1,
+            dayLimit: 1
+        },
+        {
+            id: 78039,
+            count: 8,
+            dayLimit: 8
+        }
+    ]
+};
+
 let _terminal;
 let _api;
 
@@ -204,7 +219,7 @@ async function dungeonCollection() {
     const [achievements, accountAchievements, items, bank, characters] = await Promise.all([
         _api.achievements().many(collectionAchievements),
         _api.account().achievements().many(collectionAchievements),
-        _api.items().many(Object.values(sabItems).concat(Object.values(sabContainers), Object.values(tokenItems)).flat()),
+        _api.items().many(Object.values(sabItems).concat(Object.values(sabContainers), Object.values(tokenItems), [].concat.apply([], Object.values(itemProviders)).map(x => x.id)).flat()),
         _api.account().bank().get(),
         _api.characters().all()
     ]);
@@ -299,46 +314,81 @@ async function dungeonCollection() {
         }
 
         // Determine item locations
-        const itemsUnlocked = [];
-        let tokensUnlocked = 0;
-        const addUnlockedItems = items => {
-            if (items[achievement.id]) {
-                for (const itemId of items[achievement.id]) {
+        const getOwnedItems = (items, prefix) => {
+            const result = [];
+            let count = 0;
+            if (items) {
+                for (const itemId of items) {
                     if (ownedItems.has(itemId)) {
                         for (const item of ownedItems.get(itemId)) {
                             const name = mappedItems.get(itemId) ? mappedItems.get(itemId).name : `((unknown:${itemId}))`;
-                            itemsUnlocked.push(` - ${name}: ${item.description} (x${item.count})`);
+                            result.push(`${prefix}- ${name}: ${item.description} (x${item.count})`);
+                            count += item.count;
                         }
                     }
                 }
             }
+            return [result, count];
         };
-        const addTokenItems = items => {
-            if (items[achievement.id]) {
-                const itemId = items[achievement.id];
-                if (ownedItems.has(itemId)) {
-                    for (const item of ownedItems.get(itemId)) {
-                        const name = mappedItems.get(itemId) ? mappedItems.get(itemId).name : `((unknown:${itemId}))`;
-                        itemsUnlocked.push(` - ${name}: ${item.description} (x${item.count})`);
-                        tokensUnlocked += item.count;
-                    }
-                }
-            }
-        };
-        addUnlockedItems(sabItems);
-        addUnlockedItems(sabContainers);
-        addTokenItems(tokenItems);
+        const getUnlockedItems = items => getOwnedItems(items[achievement.id], '&nbsp;')[0];
+        const getTokenItems = items => getOwnedItems([items[achievement.id]], '&nbsp;');
+
+        const sabItemsUnlockedResult = getUnlockedItems(sabItems);
+        const sabContainersUnlockedResult = getUnlockedItems(sabContainers);
+        const [tokensUnlockedResult, tokensUnlocked] = getTokenItems(tokenItems);
 
         // Output
         result += `${achievement.name}:\n`;
-        result += ` - Unlocked skins: ${skinsUnlocked.length}/${skinsUnlocked.length + skinsLocked.length}\n`;
+        result += `&nbsp;- Unlocked skins: ${skinsUnlocked.length}/${skinsUnlocked.length + skinsLocked.length}\n`;
+        
+        if (sabItemsUnlockedResult.length > 0) {
+            result += `${sabItemsUnlockedResult.join('\n')}\n`;
+        }
+
+        if (sabContainersUnlockedResult.length > 0) {
+            result += `${sabContainersUnlockedResult.join('\n')}\n`;
+        }
+
+        if (tokensUnlockedResult.length > 0) {
+            result += `${tokensUnlockedResult.join('\n')}\n`;
+        }
+
         if (tokensRequired !== undefined) {
             const name = mappedItems.get(tokenItems[achievement.id]) ? mappedItems.get(tokenItems[achievement.id]).name : `((unknown:${tokenItems[achievement.id]}))`;
-            result += ` - Tokens required: ${tokensUnlocked}/${tokensRequired}x ${name}\n`;
-            result += ` - Tokens to collect: ${tokensRequired - tokensUnlocked < 0 ? 0 : tokensRequired - tokensUnlocked}x ${name}\n`;
-        }
-        if (itemsUnlocked.length > 0) {
-            result += `${itemsUnlocked.join('\n')}\n`;
+            const tokenProviders = itemProviders[tokenItems[achievement.id]];
+
+            const tokensPerDay = tokenProviders.reduce((a, c) => a + (c.count / c.dayLimit || 0), 0);
+            result += `&nbsp;- ${tokensPerDay}x ${name} per day:\n`;
+            for (let tokenProvider of tokenProviders) {
+                result += `&nbsp;&nbsp;&nbsp;- ${mappedItems.get(tokenProvider.id).name}: ${tokenProvider.count}x per ${tokenProvider.dayLimit} day(s)\n`;
+            }
+
+            result += '&nbsp;- Without unopened containers:\n'
+            result += `&nbsp;&nbsp;&nbsp;- Tokens obtained: ${tokensUnlocked}/${tokensRequired}x ${name}\n`;
+            const tokensRemaining = tokensRequired - tokensUnlocked;
+            result += `&nbsp;&nbsp;&nbsp;- Tokens to collect: ${tokensRemaining < 0 ? 0 : tokensRemaining}x ${name}\n`;
+            if (tokensRemaining > 0) {
+                result += `&nbsp;&nbsp;&nbsp;- Days remaining: ${tokensRemaining / tokensPerDay} (does not take achievement gating into account)\n`;
+            }
+
+            result += '&nbsp;- With unopened containers:\n'
+
+            let tokensUnlockedExtra = '';
+            let tokensUnlockedExtraCount = tokensUnlocked;
+            for (let tokenProvider of tokenProviders) {
+                const [tokenContainersUnlockedResult, tokenContainersUnlocked] = getOwnedItems([tokenProvider.id], '&nbsp;&nbsp;&nbsp;');
+                tokensUnlockedExtraCount += tokenContainersUnlocked * tokenProvider.count;
+                if (tokenContainersUnlockedResult.length > 0) {
+                    tokensUnlockedExtra += `${tokenContainersUnlockedResult.join('\n')}\n`;
+                }
+            }
+            result += tokensUnlockedExtra;
+            result += `&nbsp;&nbsp;&nbsp;- Tokens obtained: ${tokensUnlockedExtraCount}/${tokensRequired}x ${name}\n`;
+            const tokensRemainingExtra = tokensRequired - tokensUnlockedExtraCount;
+            result += `&nbsp;&nbsp;&nbsp;- Tokens to collect: ${tokensRemainingExtra < 0 ? 0 : tokensRemainingExtra}x ${name}\n`;
+            if (tokensRemainingExtra > 0) {
+                result += `&nbsp;&nbsp;&nbsp;- Days remaining: ${tokensRemainingExtra / tokensPerDay} (does not take achievement gating into account)\n`;
+            }
         }
         result += `\n`;
     }
