@@ -23,8 +23,7 @@ jobs:
       - name: yarn build
         run: yarn build
       - name: Push to gh-pages
-        uses: peaceiris/actions-gh-pages@v1.1.0
+        uses: maxheld83/ghpages@v0.2.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: ./dist
+          GH_PAT: ${{ secrets.GH_PAT }}
+          BUILD_DIR: dist
