@@ -1,10 +1,8 @@
-const client = require('gw2api-client');
-const Terminal = require('./terminal.js');
+import client from 'gw2api-client';
+import Terminal from './terminal.js';
+import modules from './modules';
 
 const api = client();
-const initDungeonCollection = require('./gw2/dungeon-collection');
-const initMasteryPointAchievements = require('./gw2/mastery-point-achievements');
-const initSabCollections = require('./gw2/sab-collections');
 
 const settings = {
     get apiKey() {
@@ -57,10 +55,6 @@ async function wrapApi(promise) {
     }
 }
 
-const dungeonCollection = initDungeonCollection(terminal, api);
-const masteryPointAchievements = initMasteryPointAchievements(terminal, api);
-const sabCollections = initSabCollections(terminal, api);
-
 const commands = {
     /** Terminal specific commands **/
     clear: function() {
@@ -76,7 +70,6 @@ const commands = {
         return `The GitHub repository can be found at <a href='https://github.com/Archomeda/gw2-console' target='_blank'>github.com/Archomeda/gw2-console</a>.`;
     },
 
-    /** API commands **/
     apikey: async function(key) {
         if (!key) {
             if (settings.apiKey) {
@@ -95,9 +88,11 @@ const commands = {
                 return `Hello ${response.name}! Your API key is set to '${key}'.`;
             }
         }
-    },
+    }
+}
 
-    'dungeon-collection': async() => wrapApi(dungeonCollection()),
-    'mastery-point-achievements': async() => wrapApi(masteryPointAchievements()),
-    'sab-collections': async() => wrapApi(sabCollections())
+for (const module of modules) {
+    const newModule = new module();
+    newModule.initialize(terminal, api);
+    commands[newModule.commandName] = newModule.execute.bind(newModule);
 }
