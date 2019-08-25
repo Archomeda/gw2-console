@@ -6,23 +6,20 @@ on:
       - master
 
 jobs:
-  build:
+  deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: 
-          - '12'
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 12
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '12'
       - name: yarn install
         run: yarn install
       - name: yarn build
         run: yarn build
-      - name: Push to gh-pages
+      - name: Deploy to gh-pages
         uses: maxheld83/ghpages@v0.2.1
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
