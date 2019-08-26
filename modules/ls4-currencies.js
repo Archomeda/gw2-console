@@ -14,7 +14,7 @@ export default class extends ApiModule {
         return 'ls4-currencies';
     }
 
-    async _execute() {
+    async _execute(verbose) {
         this._terminal.writeLine(`<span style='color:yellow;'>Searching your account for Living Story Season 4 currencies. Please wait...</span>`);
         this._terminal.writeLine();
 
@@ -27,26 +27,51 @@ export default class extends ApiModule {
         let currencyCounts = {};
         Object.keys(currencies).forEach(a => currencyCounts[a] = 0);
 
-        bank.forEach(function(item) {
-            if (item === null) return;
-            if (item.id in currencyCounts) currencyCounts[item.id] += item.count;
-        });
-        materials.forEach(function(item) {
-            if (item === null) return;
-            if (item.id in currencyCounts) currencyCounts[item.id] += item.count;
-        });
-        characters.forEach(function(character) {
-            character.bags.forEach(function(bag) {
-                if (bag === null) return;
-                bag.inventory.forEach(function(item) {
-                    if (item === null) return;
-                    if (item.id in currencyCounts) currencyCounts[item.id] += item.count;
-                });
-            });
-        });
+        const bankCurrencies = bank
+              .filter(item => item && item.id in currencyCounts)
+              .map(item => (item.source = 'bank', item));
+        const materialCurrencies = materials
+              .filter(item => item && item.id in currencyCounts && item.count > 0)
+              .map(item => (item.source = 'materials', item));
+        const characterCurrencies = characters
+              .reduce((character, {bags, name}) =>
+                      ([ ...character,
+                         ...bags.filter(Boolean).reduce((bag, {inventory}) =>
+                                                        ([ ...bag,
+                                                           ...(inventory
+                                                               .filter((item) => item && item.id in currencyCounts)
+                                                               .map((item) => (item.source = name, item))
+                                                              )
+                                                         ]),
+                                                        []
+                                                       )
+                       ]),
+                      []
+                     );
+        const allCurrencies = [
+            ...bankCurrencies,
+            ...materialCurrencies,
+            ...characterCurrencies
+        ];
 
-        let result = '';
-        Object.keys(currencies).forEach(currency => result += `${currencies[currency]}: ${currencyCounts[currency]}\n`);
+        const currencyTotals = allCurrencies.reduce((counts, {id, count}) => ({ ...counts, [id]: (counts[id] || 0) + count }), currencyCounts);
+
+        let result = 'Total Currencies:\n';
+        Object.keys(currencies).forEach(currency => result += `- ${currencies[currency]}: ${currencyTotals[currency]}\n`);
+
+        if (verbose === 'verbose') {
+            result += '\n= Detailed Breakdown =\n\n';
+            const currencySources = allCurrencies.reduce((sources, item) => ({ ...sources, [item.source]: (sources[item.source] || []).concat([item]) }), {});
+            Object.keys(currencySources).forEach((source) => {
+                if (source === 'bank') result += 'Account Bank:\n'
+                else if (source === 'materials') result += 'Material Storage:\n';
+                else result += `${source}:\n`;
+                const items = currencySources[source];
+                const sourceTotals = items.reduce((counts, {id, count}) => ({ ...counts, [id]: (counts[id] || 0) + count }), {});
+                Object.keys(sourceTotals).forEach(currency => result += `- ${currencies[currency]}: ${sourceTotals[currency]}\n`);
+            });
+        }
+
         return result;
     }
 }
