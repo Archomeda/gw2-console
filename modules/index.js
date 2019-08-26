@@ -1,5 +1,6 @@
 export default [
     require('./dungeon-collection').default,
     require('./mastery-point-achievements').default,
-    require('./sab-collections').default
+    require('./sab-collections').default,
+    require('./ls4-currencies').default
 ];
