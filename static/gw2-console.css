@@ -1,0 +1,20 @@
+.item {
+  align-items: center;
+  display: inline-flex;
+  height: 12pt;
+}
+
+.item .item-icon {
+  margin-right: 4px;
+  height: 12pt;
+  width: 12pt;
+}
+
+.legendary { color: #4c139d; }
+.ascended { color: #fb3e8d; }
+.exotic { color: #ffa405; }
+.rare { color: #fcd00b; }
+.masterwork { color: #1a9306; }
+.fine { color: #62a4da; }
+.basic { color: #fff; }
+.junk { color: #aaa; }

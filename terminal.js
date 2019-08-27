@@ -170,6 +170,14 @@
 				}
 				if (response === false) response = cmd + ': command not found';
 				output(response);
+                                // Additional "after execute" handler for post-processing command output.
+                                for (var index in extensions) {
+                                    var ext = extensions[index];
+                                    if (ext.after_execute) response = ext.after_execute(cmd, args);
+                                    if (response && response.then) {
+                                        await response;
+                                    }
+                                }
 			}
 
 			// Show the command line.

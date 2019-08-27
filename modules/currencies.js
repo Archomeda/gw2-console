@@ -61,7 +61,11 @@ export default class extends ApiModule {
         const currencyTotals = allCurrencies.reduce((counts, {id, count}) => ({ ...counts, [id]: (counts[id] || 0) + count }), currencyCounts);
 
         let result = 'Total Currencies:\n';
-        Object.keys(this.currencies).forEach((currency) => (result += `- ${this.currencies[currency]}: ${currencyTotals[currency]}\n`), this);
+        result += (
+            Object.keys(this.currencies)
+                .map((item) => (this._terminal.renderItem(item, currencyTotals[item], this.currencies[item])))
+        ).map((line) => `- ${line}`).join('\n');
+        result += '\n';
 
         if (verbose === 'verbose') {
             result += '\n= Detailed Breakdown =\n\n';
@@ -72,7 +76,10 @@ export default class extends ApiModule {
                 else result += `${source}:\n`;
                 const items = currencySources[source];
                 const sourceTotals = items.reduce((counts, {id, count}) => ({ ...counts, [id]: (counts[id] || 0) + count }), {});
-                Object.keys(sourceTotals).forEach((currency) => (result += `- ${this.currencies[currency]}: ${sourceTotals[currency]}\n`), this);
+                result += (
+                    Object.keys(sourceTotals)
+                        .map((item) => (this._terminal.renderItem(item, sourceTotals[item], this.currencies[item])))
+                ).map((line) => `- ${line}`).join('\n');
             });
         }
         else {
