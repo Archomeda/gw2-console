@@ -1,13 +1,28 @@
+.terminal table.input-line tbody {
+  width: 100%;
+}
+
 .item {
   align-items: center;
   display: inline-flex;
   height: 12pt;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .item .item-icon {
   margin-right: 4px;
   height: 12pt;
   width: 12pt;
+}
+
+.terminal-line, .input-line {
+  align-content: center;
+  display: flex;
+  height: 12pt;
+  line-height: 12pt;
+  list-style: none;
+  white-space: nowrap;
 }
 
 .legendary { color: #4c139d; }

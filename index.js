@@ -46,7 +46,6 @@ const terminal = new Terminal('terminal', {
                 if (result.then) {
                     result = await result;
                 }
-                result = result.replace(/\n/g, '<br />');
                 return result;
             } else {
                 return false;
