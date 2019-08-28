@@ -1,10 +1,10 @@
-name: ESLint check
+name: ESLint
 
 on: [push, pull_request]
 
 jobs:
   lint:
-    name: Run ESLint
+    name: ESLint check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
