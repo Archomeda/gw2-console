@@ -6,8 +6,6 @@
   align-items: center;
   display: inline-flex;
   height: 12pt;
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
 }
 
 .item .item-icon {
@@ -19,10 +17,10 @@
 .terminal-line, .input-line {
   align-content: center;
   display: flex;
-  height: 12pt;
   line-height: 12pt;
   list-style: none;
-  white-space: nowrap;
+  min-height: 12pt;
+  white-space: pre-wrap;
 }
 
 .legendary { color: #4c139d; }
