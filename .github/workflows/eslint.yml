@@ -1,0 +1,14 @@
+name: ESLint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run ESLint
+        uses: gimenete/eslint-action@1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

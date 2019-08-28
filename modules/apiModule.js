@@ -12,7 +12,7 @@ async function wrapApi(promise) {
             throw `Error ${err.response.status}`;
         }
     }
-};
+}
 
 export default class extends Module {
     get commandName() {

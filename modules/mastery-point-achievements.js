@@ -1,12 +1,12 @@
 import ApiModule from './apiModule';
 
 Set.prototype.difference = function(setB) {
-    var difference = new Set(this);
+    let difference = new Set(this);
     for (let elem of setB) {
         difference.delete(elem);
     }
     return difference;
-}
+};
 
 export default class extends ApiModule {
     get commandName() {

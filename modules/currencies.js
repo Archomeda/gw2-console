@@ -28,29 +28,29 @@ export default class extends ApiModule {
         Object.keys(this.currencies).forEach(a => currencyCounts[a] = 0);
 
         const bankCurrencies = bank
-              .filter(item => item && item.id in currencyCounts)
-              .map(item => (item.source = 'bank', item));
+            .filter(item => item && item.id in currencyCounts)
+            .map(item => (item.source = 'bank', item));
         const materialCurrencies = materials
-              .filter(item => item && item.id in currencyCounts && item.count > 0)
-              .map(item => (item.source = 'materials', item));
+            .filter(item => item && item.id in currencyCounts && item.count > 0)
+            .map(item => (item.source = 'materials', item));
         const accountCurrencies = account
-              .filter(item => item && item.id in currencyCounts)
-              .map(item => (item.source = 'account', item));
+            .filter(item => item && item.id in currencyCounts)
+            .map(item => (item.source = 'account', item));
         const characterCurrencies = characters
-              .reduce((character, {bags, name}) =>
-                      ([ ...character,
-                         ...bags.filter(Boolean).reduce((bag, {inventory}) =>
-                                                        ([ ...bag,
-                                                           ...(inventory
-                                                               .filter((item) => item && item.id in currencyCounts)
-                                                               .map((item) => (item.source = name, item))
-                                                              )
-                                                         ]),
-                                                        []
-                                                       )
-                       ]),
-                      []
-                     );
+            .reduce((character, { bags, name }) =>
+                ([ ...character,
+                    ...bags.filter(Boolean).reduce((bag, { inventory }) =>
+                        ([ ...bag,
+                            ...(inventory
+                                .filter((item) => item && item.id in currencyCounts)
+                                .map((item) => (item.source = name, item))
+                            )
+                        ]),
+                    []
+                    )
+                ]),
+            []
+            );
         const allCurrencies = [
             ...bankCurrencies,
             ...materialCurrencies,
@@ -58,7 +58,7 @@ export default class extends ApiModule {
             ...characterCurrencies
         ];
 
-        const currencyTotals = allCurrencies.reduce((counts, {id, count}) => ({ ...counts, [id]: (counts[id] || 0) + count }), currencyCounts);
+        const currencyTotals = allCurrencies.reduce((counts, { id, count }) => ({ ...counts, [id]: (counts[id] || 0) + count }), currencyCounts);
 
         let result = 'Total Currencies:\n';
         result += (
@@ -71,11 +71,11 @@ export default class extends ApiModule {
             result += '\n= Detailed Breakdown =\n\n';
             const currencySources = allCurrencies.reduce((sources, item) => ({ ...sources, [item.source]: (sources[item.source] || []).concat([item]) }), {});
             Object.keys(currencySources).forEach((source) => {
-                if (source === 'bank') result += 'Account Bank:\n'
+                if (source === 'bank') result += 'Account Bank:\n';
                 else if (source === 'materials') result += 'Material Storage:\n';
                 else result += `${source}:\n`;
                 const items = currencySources[source];
-                const sourceTotals = items.reduce((counts, {id, count}) => ({ ...counts, [id]: (counts[id] || 0) + count }), {});
+                const sourceTotals = items.reduce((counts, { id, count }) => ({ ...counts, [id]: (counts[id] || 0) + count }), {});
                 result += (
                     Object.keys(sourceTotals)
                         .map((item) => (this._terminal.renderItem(item, sourceTotals[item], this.currencies[item])))
