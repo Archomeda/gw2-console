@@ -235,8 +235,10 @@
 	}
 
 	function output(html) {
-            html = html.split('\n').map((line) => (`<li class='terminal-line'>${line}</li>`)).join('');
-	    _output.insertAdjacentHTML('beforeEnd', html);
+            if (html) {
+                html = html.split('\n').map((line) => (`<li class='terminal-line'>${line}</li>`)).join('');
+	        _output.insertAdjacentHTML('beforeEnd', html);
+            }
 	    _cmdLine.scrollIntoView();
 	}
 
