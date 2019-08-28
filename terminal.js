@@ -45,7 +45,7 @@
         const _background = document.querySelector('.background');
 
         // Hackery to resize the interlace background image as the container grows.
-        _output.addEventListener('DOMSubtreeModified', function(e) {
+        _output.addEventListener('DOMSubtreeModified', function() {
         // Works best with the scroll into view wrapped in a setTimeout.
             setTimeout(function() {
                 _cmdLine.scrollIntoView();
@@ -56,7 +56,7 @@
             output(options.welcome);
         }
 
-        window.addEventListener('click', function(e) {
+        window.addEventListener('click', function() {
             _cmdLine.focus();
         }, false);
 
@@ -67,7 +67,7 @@
 
         // Always force text cursor to end of input line.
         _cmdLine.addEventListener('click', inputTextClick, false);
-        _inputLine.addEventListener('click', function(e) {
+        _inputLine.addEventListener('click', function() {
             _cmdLine.focus();
         }, false);
 
@@ -123,7 +123,7 @@
             }
         }
 
-        function resetTabCompletion(e) {
+        function resetTabCompletion() {
             _tabCompletionPrefix = null;
             _tabCompletionIndex = 0;
         }
@@ -198,7 +198,7 @@
             let cmd;
             let args;
             if (cmdline && cmdline.trim()) {
-                args = cmdline.split(' ').filter(function(val, i) {
+                args = cmdline.split(' ').filter(function(val) {
                     return val;
                 });
                 cmd = args[0];

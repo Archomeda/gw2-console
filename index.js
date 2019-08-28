@@ -62,7 +62,7 @@ const terminal = new Terminal('terminal', {
             return `<span style='color:red;'>${err}</span>`;
         }
     },
-    afterExecute: async function (cmd, args) {
+    afterExecute: async function () {
         await renderIcons();
     },
     tabComplete: async function(prefix, index) {
