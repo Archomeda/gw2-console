@@ -1,3 +1,4 @@
+import cacheBrowserStorage from 'gw2api-client/src/cache/browser';
 import client from 'gw2api-client';
 import Terminal from './terminal.js';
 import modules from './modules';
@@ -18,6 +19,12 @@ const settings = {
 if (settings.apiKey) {
     api.authenticate(settings.apiKey);
 }
+
+const cacheOptions = {
+    storageKey: 'gw2-console'
+}
+
+api.cacheStorage(cacheBrowserStorage(cacheOptions));
 
 async function renderIcons() {
     const icons = Array.from(document.querySelectorAll('.item.item-unrendered'));
