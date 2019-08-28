@@ -57,6 +57,14 @@ const terminal = new Terminal('terminal', {
     },
     after_execute: async function (cmd, args) {
         await renderIcons();
+    },
+    tabComplete: async function(prefix, index) {
+        const candidates = Object.keys(commands).sort().filter((cmd) => (cmd.startsWith(prefix)));
+        if (candidates.length > 0) {
+            const fixedIndex = index % candidates.length;
+            return candidates[fixedIndex];
+        }
+        return false;
     }
 });
 
