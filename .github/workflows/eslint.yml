@@ -14,7 +14,7 @@ jobs:
           node-version: '12'
       - name: yarn install
         run: yarn install
-      - name: ESLint checks
+      - name: Run ESLint
         uses: gimenete/eslint-action@1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
