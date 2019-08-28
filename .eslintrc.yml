@@ -37,6 +37,8 @@ rules:
     - warn
   no-use-extend-native/no-use-extend-native:
     - off
+  no-var:
+    - error
   object-curly-spacing:
     - error
     - always

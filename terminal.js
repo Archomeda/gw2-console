@@ -1,31 +1,32 @@
-(function (global, undefined) {
-    var Terminal = Terminal || function(containerID, options) {
+(function (global) {
+    let Terminal;
+    Terminal = Terminal || function(containerID, options) {
         if (!containerID) return;
 
-        var defaults = {
+        const defaults = {
             welcome: '',
             prompt: '',
             separator: '&gt;',
             theme: 'interlaced'
         };
 
-        var options = options || defaults;
+        options = options || defaults;
         options.welcome = options.welcome || defaults.welcome;
         options.prompt = options.prompt || defaults.prompt;
         options.separator = options.separator || defaults.separator;
         options.theme = options.theme || defaults.theme;
 
-        var extensions = Array.prototype.slice.call(arguments, 2);
+        const extensions = Array.prototype.slice.call(arguments, 2);
 
-        var _history = localStorage.history ? JSON.parse(localStorage.history) : [];
-        var _histpos = _history.length;
-        var _histtemp = '';
+        const _history = localStorage.history ? JSON.parse(localStorage.history) : [];
+        let _histpos = _history.length;
+        let _histtemp = '';
 
-        var _tabCompletionPrefix = '';
-        var _tabCompletionIndex = 0;
+        let _tabCompletionPrefix = '';
+        let _tabCompletionIndex = 0;
 
         // Create terminal and cache DOM nodes;
-        var _terminal = document.getElementById(containerID);
+        const _terminal = document.getElementById(containerID);
         _terminal.classList.add('terminal');
         _terminal.classList.add('terminal-' + options.theme);
         _terminal.insertAdjacentHTML('beforeEnd', [
@@ -36,12 +37,12 @@
             '<tr><td nowrap><div class="prompt">' + options.prompt + options.separator + '</div></td><td width="100%"><input class="cmdline" spellcheck="false" autofocus /></td></tr>',
             '</table>',
             '</div>'].join(''));
-        var _container = _terminal.querySelector('.container');
-        var _inputLine = _container.querySelector('.input-line');
-        var _cmdLine = _container.querySelector('.input-line .cmdline');
-        var _output = _container.querySelector('output');
-        var _prompt = _container.querySelector('.prompt');
-        var _background = document.querySelector('.background');
+        const _container = _terminal.querySelector('.container');
+        const _inputLine = _container.querySelector('.input-line');
+        const _cmdLine = _container.querySelector('.input-line .cmdline');
+        const _output = _container.querySelector('output');
+        const _prompt = _container.querySelector('.prompt');
+        const _background = document.querySelector('.background');
 
         // Hackery to resize the interlace background image as the container grows.
         _output.addEventListener('DOMSubtreeModified', function(e) {
@@ -142,14 +143,14 @@
             if (e.keyCode != 9) return;
 
             e.preventDefault();
-            var command = this.value;
+            const command = this.value;
             if (command === '' || command.includes(' ')) return;
 
             _tabCompletionPrefix = _tabCompletionPrefix || command;
 
-            var response = false;
-            for (var index in extensions) {
-                var ext = extensions[index];
+            let response = false;
+            for (let index in extensions) {
+                let ext = extensions[index];
                 if (ext.tabComplete) response = ext.tabComplete(_tabCompletionPrefix, _tabCompletionIndex);
                 if (response && response.then) {
                     response = await response;
@@ -166,7 +167,7 @@
         // Only handle the Enter key.
             if (e.keyCode != 13) return;
 
-            var cmdline = this.value;
+            const cmdline = this.value;
             resetTabCompletion();
 
             // Save shell history.
@@ -177,10 +178,10 @@
             }
 
             // Duplicate current input and append to output section.
-            var line = this.parentNode.parentNode.parentNode.parentNode.cloneNode(true);
+            const line = this.parentNode.parentNode.parentNode.parentNode.cloneNode(true);
             line.removeAttribute('id');
             line.classList.add('line');
-            var input = line.querySelector('input.cmdline');
+            const input = line.querySelector('input.cmdline');
             input.autofocus = false;
             input.readOnly = true;
             input.insertAdjacentHTML('beforebegin', input.value);
@@ -194,18 +195,20 @@
             this.value = '';
 
             // Parse out command, args, and trim off whitespace.
+            let cmd;
+            let args;
             if (cmdline && cmdline.trim()) {
-                var args = cmdline.split(' ').filter(function(val, i) {
+                args = cmdline.split(' ').filter(function(val, i) {
                     return val;
                 });
-                var cmd = args[0];
+                cmd = args[0];
                 args = args.splice(1); // Remove cmd from arg list.
             }
 
             if (cmd) {
-                var response = false;
-                for (var index in extensions) {
-                    var ext = extensions[index];
+                let response = false;
+                for (const index in extensions) {
+                    const ext = extensions[index];
                     if (ext.execute) response = ext.execute(cmd, args);
                     if (response && response.then) {
                         response = await response;
@@ -215,8 +218,8 @@
                 if (response === false) response = cmd + ': command not found';
                 output(response);
                 // Additional "after execute" handler for post-processing command output.
-                for (var index in extensions) {
-                    var ext = extensions[index];
+                for (const index in extensions) {
+                    const ext = extensions[index];
                     if (ext.afterExecute) response = ext.afterExecute(cmd, args);
                     if (response && response.then) {
                         await response;
@@ -263,7 +266,7 @@
 
         // web browsers
     } else {
-        var oldTerminal = global.Terminal;
+        const oldTerminal = global.Terminal;
         Terminal.noConflict = function () {
             global.Terminal = oldTerminal;
             return Terminal;
