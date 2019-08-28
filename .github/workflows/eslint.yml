@@ -1,0 +1,20 @@
+name: ESLint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+      - name: yarn install
+        run: yarn install
+      - name: Annotated ESLint
+        uses: rkusa/eslint-action@1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

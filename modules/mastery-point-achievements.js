@@ -6,7 +6,7 @@ Set.prototype.difference = function(setB) {
         difference.delete(elem);
     }
     return difference;
-}
+};
 
 export default class extends ApiModule {
     get commandName() {

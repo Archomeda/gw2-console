@@ -89,7 +89,7 @@ const commands = {
             }
         }
     }
-}
+};
 
 for (const module of modules) {
     const newModule = new module();

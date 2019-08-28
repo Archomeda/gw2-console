@@ -367,7 +367,7 @@ export default class extends ApiModule {
                     result += `&nbsp;&nbsp;&nbsp;- ${mappedItems.get(tokenProvider.id).name}: ${tokenProvider.count}x per ${tokenProvider.dayLimit} day(s)\n`;
                 }
 
-                result += '&nbsp;- Without unopened containers:\n'
+                result += '&nbsp;- Without unopened containers:\n';
                 result += `&nbsp;&nbsp;&nbsp;- Tokens obtained: ${tokensUnlocked}/${tokensRequired}x ${name}\n`;
                 const tokensRemaining = tokensRequired - tokensUnlocked;
                 result += `&nbsp;&nbsp;&nbsp;- Tokens to collect: ${tokensRemaining < 0 ? 0 : tokensRemaining}x ${name}\n`;
@@ -375,7 +375,7 @@ export default class extends ApiModule {
                     result += `&nbsp;&nbsp;&nbsp;- Days remaining: ${tokensRemaining / tokensPerDay} (does not take achievement gating into account)\n`;
                 }
 
-                result += '&nbsp;- With unopened containers:\n'
+                result += '&nbsp;- With unopened containers:\n';
 
                 let tokensUnlockedExtra = '';
                 let tokensUnlockedExtraCount = tokensUnlocked;

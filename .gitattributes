@@ -1,0 +1,6 @@
+* text=auto
+# Add exceptions when needed
+
+.gitattributes export-ignore
+.gitignore export-ignore
+.github export-ignore

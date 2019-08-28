@@ -1,0 +1,47 @@
+env:
+  browser: true
+  es6: true
+  node: true
+extends:
+  - eslint:recommended
+globals:
+  Atomics: readonly
+  SharedArrayBuffer: readonly
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: module
+
+rules:
+  camelcase:
+    - error
+    - properties: always
+  linebreak-style:
+    - off
+  indent:
+    - error
+    - 4
+    - SwitchCase: 1
+  semi:
+    - error
+    - always
+  no-div-regex:
+    - off
+  no-multiple-empty-lines:
+    - error
+    - max: 2
+  no-negated-condition:
+    - off
+  no-prototype-builtins:
+    - off
+  no-unused-vars:
+    - warn
+  no-use-extend-native/no-use-extend-native:
+    - off
+  object-curly-spacing:
+    - error
+    - always
+  quotes:
+    - error
+    - single
+    - avoidEscape: true
+      allowTemplateLiterals: true
