@@ -19,7 +19,7 @@ export default class extends Module {
         throw new TypeError('commandName needs to be implemented by derivatives');
     }
 
-    execute() {
-        return wrapApi(this._execute());
+    execute(...args) {
+        return wrapApi(this._execute(...args));
     }
 }
