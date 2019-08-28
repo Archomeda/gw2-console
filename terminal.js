@@ -60,6 +60,7 @@
 	}, false);
 
 	_output.addEventListener('click', function(e) {
+            _cmdLine.focus();
 	    e.stopPropagation();
 	}, false);
 
