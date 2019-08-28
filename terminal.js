@@ -81,7 +81,7 @@
             e.preventDefault();
         }, false);
 
-        function inputTextClick(e) {
+        function inputTextClick() {
             this.value = this.value;
         }
 
