@@ -7,6 +7,7 @@ html,body{margin:0;height:100%;}
 .terminal .cmdline{background-color:transparent;border:none;color:inherit;font:inherit;margin:0;outline:none;width:100%;}
 .terminal .hidden{display:none;}
 .terminal output table.input-line td:last-child{padding-left:1px;}
+.terminal output ul{margin:0;padding:0;}
 .terminal .prompt{line-height:20px;margin-right:7px;white-space:nowrap;}
 .terminal table.input-line{border-collapse:collapse;border-spacing:0;margin:0;padding:0;width:100%;}
 .terminal table.input-line td{margin:0;padding:0;}

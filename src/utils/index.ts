@@ -1,6 +1,4 @@
-import Module from './module';
-
-async function wrapApi(promise) {
+export async function wrapApi<T>(promise: Promise<T>): Promise<T> {
     try {
         return await promise;
     } catch (err) {
@@ -11,15 +9,5 @@ async function wrapApi(promise) {
         } else {
             throw `Error ${err.response.status}`;
         }
-    }
-}
-
-export default class extends Module {
-    get commandName() {
-        throw new TypeError('commandName needs to be implemented by derivatives');
-    }
-
-    execute(...args) {
-        return wrapApi(this._execute(...args));
     }
 }

@@ -1,4 +1,8 @@
-import ApiModule from './apiModule';
+import { injectable } from 'tsyringe';
+import { wrapApi } from '../utils';
+import Gw2Api from '../gw2api';
+import Console from '../console';
+import ICommand from './icommand'
 
 const collectionAchievements = [
     1725, // AC
@@ -50,24 +54,25 @@ const skinCosts = {
     Warhorn: 210
 };
 
-export default class extends ApiModule {
-    get commandName() {
-        return 'dungeon-collection';
-    }
+@injectable()
+export default class DungeonCollections implements ICommand {
+    constructor(private console: Console, private api: Gw2Api) { }
 
-    async _execute() {
-        this._terminal.writeLine(`<span style='color:yellow;'>This command will search your account for the dungeon collection skins and outputs the amount of unlocked skins, the amount of required tokens and the amount of tokens still left to collect in order to complete the collection. Please wait...</span>`);
-        this._terminal.writeLine();
+    get name() { return 'dungeon-collection'; }
+
+    async execute(args: string[]) {
+        this.console.terminal.writeLine(`<span style='color:yellow;'>Searching your account for dungeon collection skins...</span>`);
+        this.console.terminal.writeLine();
 
         const [achievements, accountAchievements, wallet] = await Promise.all([
-            this._api.achievements().many(collectionAchievements),
-            this._api.account().achievements().many(collectionAchievements),
-            this._api.account().wallet().get()
+            wrapApi(this.api.client.achievements().many(collectionAchievements)),
+            wrapApi(this.api.client.account().achievements().many(collectionAchievements)),
+            wrapApi(this.api.client.account().wallet().get())
         ]);
 
         const skinIds = achievements.map(a => a.bits.map(b => b.id));
         const skins = new Map(
-            (await Promise.all(skinIds.map(x => this._api.skins().many(x))))
+            (await Promise.all(skinIds.map(x => wrapApi(this.api.client.skins().many(x)))))
                 .flat()
                 .map(x => [x.id, x]));
 
@@ -77,18 +82,17 @@ export default class extends ApiModule {
             const accountAchievement = accountAchievements.find(a => a.id === achievement.id);
             const skinsUnlocked = accountAchievement ? (accountAchievement.done ? achievement.bits.map(b => b.id) : accountAchievement.bits.map(b => achievement.bits[b].id)) : [];
             const skinsLocked = achievement.bits.filter(b => skinsUnlocked.indexOf(b.id) === -1).map(b => b.id);
-    
+
             // Determine dungeon tokens
             const tokensSpent = skinsUnlocked.map(id => skinCosts[skins.get(id).details.type]).reduce((a, b) => a + b);
             const tokensLeft = skinsLocked.map(id => skinCosts[skins.get(id).details.type]).reduce((a, b) => a + b);
             const tokensOwned = wallet.find(c => c.id === tokenCurrencies[achievement.id]).value;
-    
+
             // Output
             result += `${achievement.name}:\n`;
             result += ` - Unlocked skins: ${skinsUnlocked.length}/${skinsUnlocked.length + skinsLocked.length}\n`;
             result += ` - Tokens required: ${tokensLeft.toLocaleString()} (${tokensSpent.toLocaleString()}/${(tokensSpent + tokensLeft).toLocaleString()})\n`;
             result += ` - Tokens to collect: ${(tokensLeft < tokensOwned ? 0 : tokensLeft - tokensOwned).toLocaleString()} (${tokensOwned.toLocaleString()}/${tokensLeft.toLocaleString()})\n`;
-            result += `\n`;
         }
         return result;
     }

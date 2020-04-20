@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "DOM",
+      "ES2019"
+    ],
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "outDir": "./dist",
+    "sourceMap": true,
+    "target": "es5",
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
+  },
+  "exclude": [
+    "node_modules",
+    "typings",
+  ]
+}

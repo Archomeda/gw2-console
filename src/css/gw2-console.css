@@ -3,8 +3,6 @@
 }
 
 .item {
-  align-items: center;
-  display: inline-flex;
   height: 12pt;
 }
 
@@ -12,6 +10,11 @@
   margin-right: 4px;
   height: 12pt;
   width: 12pt;
+  vertical-align: middle;
+}
+
+.item .item-label {
+  vertical-align: middle;
 }
 
 .terminal-line, .input-line {

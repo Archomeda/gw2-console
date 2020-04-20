@@ -1,4 +1,8 @@
-import ApiModule from './apiModule';
+import { injectable } from 'tsyringe';
+import { wrapApi } from '../utils';
+import Gw2Api from '../gw2api';
+import Console from '../console';
+import ICommand from './icommand'
 
 const collectionAchievements = [
     2875, // The Super Adventure (blue)
@@ -214,42 +218,44 @@ const itemProviders = {
     ]
 };
 
-export default class extends ApiModule {
-    get commandName() {
-        return 'sab-collections';
-    }
+const sabItemIds = Object.values(sabItems).concat(Object.values(sabContainers), Object.values(tokenItems), [].concat.apply([], Object.values(itemProviders)).map(x => x.id)).flat();
 
-    async _execute() {
-        this._terminal.writeLine(`<span style='color:yellow;'>This command will search your account for all SAB related skin collections, and outputs the result. Please wait...</span>`);
-        this._terminal.writeLine();
-            
+@injectable()
+export default class SabCollections implements ICommand {
+    constructor(private console: Console, private api: Gw2Api) { }
+
+    get name() { return 'sab-collections'; }
+
+    async execute(args: string[]) {
+        this.console.terminal.writeLine(`<span style='color:yellow;'>Searching your account for SAB related skin collections...</span>`);
+        this.console.terminal.writeLine();
+
         const [achievements, accountAchievements, items, bank, characters] = await Promise.all([
-            this._api.achievements().many(collectionAchievements),
-            this._api.account().achievements().many(collectionAchievements),
-            this._api.items().many(Object.values(sabItems).concat(Object.values(sabContainers), Object.values(tokenItems), [].concat.apply([], Object.values(itemProviders)).map(x => x.id)).flat()),
-            this._api.account().bank().get(),
-            this._api.characters().all()
+            wrapApi(this.api.client.achievements().many(collectionAchievements)),
+            wrapApi(this.api.client.account().achievements().many(collectionAchievements)),
+            wrapApi(this.api.client.items().many(sabItemIds)),
+            wrapApi(this.api.client.account().bank().get()),
+            wrapApi(this.api.client.characters().all())
         ]);
 
         const mappedItems = new Map(items.map(x => [x.id, x]));
 
         // Get skin ids from achievements
-        const achievementSkins = new Map(achievements.map(a => [a.id, a.bits.map(b => b.id)]));
+        const achievementSkins = new Map(achievements.map(a => [a.id.toString(), a.bits.map(b => b.id)]));
 
         // Get item skins
         const itemsToFind = new Map(items.map(x => {
             switch (x.type) {
                 case 'Consumable':
-                    return [x.id, x.details.skins];
+                    return [x.id, x.details.skins!] as [number, number[]];
                 case 'Weapon':
-                    return [x.id, [x.default_skin]];
+                    return [x.id, [x.default_skin!]] as [number, number[]];
             }
             return undefined;
         }).filter(x => x));
 
         // Add containers
         for (let achievementId of Object.keys(sabContainers)) {
-            achievementId = parseInt(achievementId, 10);
             for (const containerId of sabContainers[achievementId]) {
                 itemsToFind.set(containerId, achievementSkins.get(achievementId));
             }
@@ -257,7 +263,6 @@ export default class extends ApiModule {
 
         // Add tokens
         for (let achievementId of Object.keys(tokenItems)) {
-            achievementId = parseInt(achievementId, 10);
             itemsToFind.set(tokenItems[achievementId], null);
         }
 
@@ -276,7 +281,7 @@ export default class extends ApiModule {
 
         // Match all consumables in inventories
         const ownedItems = new Map();
-        const addOwnedItem = (id, count, description) => {
+        const addOwnedItem = (id: number, count: number, description: string) => {
             if (!ownedItems.has(id)) {
                 ownedItems.set(id, []);
             }
@@ -314,11 +319,11 @@ export default class extends ApiModule {
             // Determine tokens
             let tokensRequired = undefined;
             if (tokenCosts[achievement.id]) {
-                tokensRequired = Object.values(tokenCosts[achievement.id]).reduce((a, b) => a + b, 0);
+                tokensRequired = Object.values(tokenCosts[achievement.id]).reduce((a: number, b: number) => a + b, 0);
             }
 
             // Determine item locations
-            const getOwnedItems = (items, prefix) => {
+            const getOwnedItems = (items: number[], prefix: string) => {
                 const result = [];
                 let count = 0;
                 if (items) {
@@ -332,10 +337,10 @@ export default class extends ApiModule {
                         }
                     }
                 }
-                return [result, count];
+                return [result, count] as [any[], number];
             };
-            const getUnlockedItems = items => getOwnedItems(items[achievement.id], '&nbsp;')[0];
-            const getTokenItems = items => getOwnedItems([items[achievement.id]], '&nbsp;');
+            const getUnlockedItems = (items: { [key: string]: number[] }) => getOwnedItems(items[achievement.id], '&nbsp;')[0];
+            const getTokenItems = (items: { [key: string]: number }) => getOwnedItems([items[achievement.id]], '&nbsp;');
 
             const sabItemsUnlockedResult = getUnlockedItems(sabItems);
             const sabContainersUnlockedResult = getUnlockedItems(sabContainers);
@@ -344,7 +349,7 @@ export default class extends ApiModule {
             // Output
             result += `${achievement.name}:\n`;
             result += `&nbsp;- Unlocked skins: ${skinsUnlocked.length}/${skinsUnlocked.length + skinsLocked.length}\n`;
-            
+
             if (sabItemsUnlockedResult.length > 0) {
                 result += `${sabItemsUnlockedResult.join('\n')}\n`;
             }
@@ -359,7 +364,7 @@ export default class extends ApiModule {
 
             if (tokensRequired !== undefined) {
                 const name = mappedItems.get(tokenItems[achievement.id]) ? mappedItems.get(tokenItems[achievement.id]).name : `((unknown:${tokenItems[achievement.id]}))`;
-                const tokenProviders = itemProviders[tokenItems[achievement.id]];
+                const tokenProviders = itemProviders[tokenItems[achievement.id]] as { [key: string]: number }[];
 
                 const tokensPerDay = tokenProviders.reduce((a, c) => a + (c.count / c.dayLimit || 0), 0);
                 result += `&nbsp;- ${tokensPerDay}x ${name} per day:\n`;
@@ -394,7 +399,6 @@ export default class extends ApiModule {
                     result += `&nbsp;&nbsp;&nbsp;- Days remaining: ${tokensRemainingExtra / tokensPerDay} (does not take achievement gating into account)\n`;
                 }
             }
-            result += `\n`;
         }
         return result;
     }
