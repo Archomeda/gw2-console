@@ -39,8 +39,15 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: dist
-      - name: Move dist
-        run: mv dist/* ./
+      - name: Commit new dist
+        run: |
+          mv dist/* ./
+          git add -A
+          if [[ `git status --porcelain` ]]; then
+            git config --local user.email "actions@github.com"
+            git config --local user.name "github-actions"
+            git commit -m "Deploy from ${GITHUB_SHA:0:7}"
+          fi
       - name: Push dist
         uses: ad-m/github-push-action@master
         with:
