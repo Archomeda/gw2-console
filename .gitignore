@@ -1,5 +1,4 @@
-dist/bundle.js
-dist/bundle.js.map
+dist
 
 ###
 ### Node.gitignore from https://github.com/github/gitignore #
